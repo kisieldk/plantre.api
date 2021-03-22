@@ -1,0 +1,46 @@
+type User {
+  userId: ID!
+  name: String
+  type: String
+  trainingUnits: [TrainingUnit] @relation(name: "MAKE", direction: OUT)
+  trainings: [Training] @relation(name: "MAKE", direction: OUT)
+  users: [User] @relation(name: "MEMBER", direction: IN)
+}
+
+input UserInput{
+  userId: ID!
+  name: String
+  type: String
+}
+
+type Training {
+  trainingId: ID!
+  name: String
+  type: String
+  date: DateTime
+  description: String
+  trainingUnits: [TrainingUnit] @relation(name: "HAS", direction: OUT)
+  user: User @relation(name: "MAKE", direction: IN)
+}
+
+type TrainingUnit {
+  trainingUnitId: ID!
+  repets: Float
+  text: String
+  equipment: String
+  type: String
+  participantsNo: Float
+  training: Training @relation(name: "HAS", direction: IN)
+  user: User @relation(name: "MAKE", direction: IN)
+}
+
+type Mutation {
+   MergeUser(userInput: UserInput!): User!
+    @cypher(
+      statement:"MERGE (user:User {userId: $userInput.userId}) SET user = $userInput RETURN user"
+   )
+}
+
+type Query {
+  userCount: Int! @cypher(statement: "MATCH (u:User) RETURN COUNT(u)")
+}
